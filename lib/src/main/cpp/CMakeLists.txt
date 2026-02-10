@@ -4,7 +4,7 @@ project(rtmpdroid)
 include(ExternalProject)
 find_program(GIT "git")
 
-set(OPENSSL_VERSION "openssl-3.0.16")
+set(OPENSSL_VERSION "openssl-3.4.1")
 set(RTMP_VERSION "f1b83c10d8beb43fcc70a6e88cf4325499f25857")
 
 set(PACKAGING UNPACKED CACHE STRING "Set packaging type")
