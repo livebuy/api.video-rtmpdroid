@@ -24,13 +24,27 @@ endif ()
 
 # OpenSSL - needs few executable such as perl and mv in PATH
 ExternalProject_Add(openssl_project
-        GIT_REPOSITORY https://github.com/openssl/openssl.git
-        GIT_TAG ${OPENSSL_VERSION}
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PATH=${ANDROID_TOOLCHAIN_ROOT}/bin:$ENV{PATH} CC=${CMAKE_C_COMPILER} ANDROID_NDK_ROOT=${ANDROID_NDK} perl <SOURCE_DIR>/Configure android-${ANDROID_ARCH_NAME} --openssldir=${CMAKE_LIBRARY_OUTPUT_DIRECTORY} --libdir="" --prefix=${CMAKE_LIBRARY_OUTPUT_DIRECTORY} no-tests ${OPENSSL_FEATURES} -D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}
-        BUILD_COMMAND ${CMAKE_COMMAND} -E env PATH=${ANDROID_TOOLCHAIN_ROOT}/bin:$ENV{PATH} ANDROID_NDK_ROOT=${ANDROID_NDK} make
-        BUILD_BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libssl.${LIBRARY_EXTENSION} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libcrypto.${LIBRARY_EXTENSION}
-        BUILD_IN_SOURCE 1
-        )
+    GIT_REPOSITORY https://github.com/openssl/openssl.git
+    GIT_TAG ${OPENSSL_VERSION}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
+        PATH=${ANDROID_TOOLCHAIN_ROOT}/bin:$ENV{PATH}
+        CC=${CMAKE_C_COMPILER}
+        ANDROID_NDK_ROOT=${ANDROID_NDK}
+        perl <SOURCE_DIR>/Configure android-${ANDROID_ARCH_NAME}
+        --openssldir=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        --libdir=""
+        --prefix=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        no-tests ${OPENSSL_FEATURES}
+        -D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}
+        -Wl,-z,max-page-size=16384
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+        PATH=${ANDROID_TOOLCHAIN_ROOT}/bin:$ENV{PATH}
+        ANDROID_NDK_ROOT=${ANDROID_NDK}
+        make
+    BUILD_BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libssl.${LIBRARY_EXTENSION}
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libcrypto.${LIBRARY_EXTENSION}
+    BUILD_IN_SOURCE 1
+)
 
 add_library(ssl ${LIBRARY_FORMAT} IMPORTED)
 add_dependencies(ssl openssl_project)
@@ -76,6 +90,8 @@ ExternalProject_Add(rtmp_project
         -DANDROID_DISABLE_FORMAT_STRING_CHECKS=${ANDROID_DISABLE_FORMAT_STRING_CHECKS}
         -DANDROID_CCACHE=${ANDROID_CCACHE}
         -DANDROID_SANITIZE=${ANDROID_SANITIZE}
+        -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384
+        -DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,max-page-size=16384
         BUILD_BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/librtmp.${LIBRARY_EXTENSION}
         DEPENDS crypto ssl
         BUILD_IN_SOURCE 1
@@ -87,5 +103,6 @@ set_target_properties(rtmp PROPERTIES IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_D
 
 # Target library
 add_library(rtmpdroid SHARED glue.cpp)
+target_link_options(rtmpdroid PRIVATE "-Wl,-z,max-page-size=16384")
 include_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/include)
 target_link_libraries(rtmpdroid log android rtmp ${TARGET_LINK_LIBRARY})
