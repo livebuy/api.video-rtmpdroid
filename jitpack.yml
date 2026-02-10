@@ -1,4 +1,6 @@
 jdk:
   - openjdk17
 before_install:
-  - yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+  - yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+  - git config --global user.email "chifor.mihai21@gmail.com"
+  - git config --global user.name "Mihai Chifor"
