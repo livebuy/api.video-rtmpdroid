@@ -42,13 +42,6 @@ android {
             }
             versionName "$VERSION_NAME-packed"
         }
-        unpacked {
-            dimension "packaging"
-            externalNativeBuild.cmake {
-                arguments '-DPACKAGING=UNPACKED'
-            }
-            versionName VERSION_NAME
-        }
     }
 
     compileOptions {
