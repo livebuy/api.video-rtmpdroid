@@ -6,8 +6,6 @@ package video.api.rtmpdroid
  */
 object RtmpNativeLoader {
     init {
-        System.loadLibrary("crypto")
-        System.loadLibrary("ssl")
         System.loadLibrary("rtmpdroid")
     }
 }
